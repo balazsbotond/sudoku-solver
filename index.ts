@@ -1,6 +1,6 @@
 type Board = number[][];
 
-const testBoard = [
+const easyBoard = [
   [3, 4, 0, 0, 2, 6, 0, 8, 0],
   [0, 0, 1, 0, 7, 0, 0, 0, 0],
   [7, 2, 0, 8, 0, 0, 4, 3, 9],
@@ -10,6 +10,30 @@ const testBoard = [
   [0, 0, 0, 5, 6, 8, 0, 0, 7],
   [0, 0, 0, 0, 0, 2, 0, 0, 5],
   [2, 5, 4, 0, 9, 7, 8, 6, 3],
+] as Board;
+
+const hardBoard = [
+  [0, 6, 0, 0, 1, 0, 8, 7, 0],
+  [0, 9, 0, 0, 8, 0, 6, 0, 0],
+  [0, 0, 0, 6, 2, 0, 0, 0, 0],
+  [0, 0, 0, 9, 6, 0, 0, 0, 0],
+  [0, 0, 5, 0, 0, 0, 0, 0, 2],
+  [0, 7, 9, 0, 0, 0, 0, 0, 5],
+  [0, 0, 0, 0, 0, 4, 0, 0, 0],
+  [2, 0, 0, 0, 0, 0, 0, 8, 0],
+  [8, 0, 0, 0, 0, 0, 0, 5, 1],
+] as Board;
+
+const emptyBoard = [
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
 ] as Board;
 
 function wait(ms: number) {
@@ -71,22 +95,23 @@ function isValid(num: number, row: number, col: number, board: Board) {
   return true;
 }
 
-function solve(board: Board, row: number, col: number): boolean {
+function solve(board: Board, row: number, col: number, animate: boolean): boolean {
   if (row === 9) {
     return true; // puzzle solved
   }
+  const [nextRow, nextCol] = next(row, col);
   if (board[row][col] !== 0) {
-    const [nextRow, nextCol] = next(row, col);
-    return solve(board, nextRow, nextCol);
+    return solve(board, nextRow, nextCol, animate);
   }
   for (let i = 1; i <= 9; i++) {
     if (!isValid(i, row, col, board)) {
       continue;
     }
     board[row][col] = i;
-    updateScreen(board);
-    const [nextRow, nextCol] = next(row, col);
-    if (solve(board, nextRow, nextCol)) {
+    if (animate) {
+      updateScreen(board);
+    }
+    if (solve(board, nextRow, nextCol, animate)) {
       return true;
     }
     board[row][col] = 0;
@@ -101,11 +126,25 @@ function next(row: number, col: number) {
   return [row + 1, 0];
 }
 
-updateScreen(testBoard);
-const success = solve(testBoard, 0, 0);
+function main(board: Board, animate: boolean) {
+  if (animate) {
+    updateScreen(board);
+  }
+  console.time('Elapsed time');
+  const success = solve(board, 0, 0, animate);
+  console.timeEnd('Elapsed time');
 
-if (success) {
-  console.log('\nSolution found.\n');
-} else {
-  console.log('\nUnsolvable puzzle.\n');
+  if (success) {
+    if (!animate) {
+      console.log();
+      printBoard(board);
+    }
+    console.log('\nSolution found.\n');
+  } else {
+    console.log('\nUnsolvable puzzle.\n');
+  }
 }
+
+const animate = false;
+
+main(emptyBoard, animate);
